@@ -36,11 +36,23 @@ function generateLibFilesRecursively(options: {
         const shimPathLiteral: string = JSON.stringify(Path.convertToSlashes(shimPath));
         const srcImportPathLiteral: string = JSON.stringify(srcImportPath);
 
+        // Try to reflect namedExports by require('@microsoft/rush-lib')._rushSdk_loadInternalModule("...")
+        // const code = FileSystem.readFile(require.resolve('@microsoft/rush-lib/lib/' + srcImportPath), {
+        //   encoding: Encoding.Utf8
+        // });
+        const cjsMod: Record<string, unknown> = require('@microsoft/rush-lib/lib/' + srcImportPath);
+        const namedExports: string[] = Object.keys(cjsMod).filter((key) => key !== 'default');
+        const namedExportsDefinitionCode: string =
+          namedExports.length === 0
+            ? ''
+            : namedExports.map((name) => `exports.${name}`).join(' = ') + ' = undefined;\n';
+
         FileSystem.writeFile(
           targetPath,
           // Example:
+          // exports.namedExport1 = exports.namedExport2 = undefined;
           // module.exports = require("../../../lib-shim/index")._rushSdk_loadInternalModule("logic/policy/GitEmailPolicy");
-          `module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
+          `${namedExportsDefinitionCode}module.exports = require(${shimPathLiteral})._rushSdk_loadInternalModule(${srcImportPathLiteral});`
         );
       }
     }
