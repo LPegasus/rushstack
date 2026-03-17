@@ -91,7 +91,8 @@ export default async function createPackageSummary(
         semver.valid(versionToUse)
           ? !semver.satisfies(versionToUse, packageJsonVersion)
           : false,
-      bump: bump
+      bump: bump,
+      ...(fromRegistry.deprecated !== undefined && { deprecated: fromRegistry.deprecated })
     };
   });
 }

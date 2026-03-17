@@ -76,4 +76,48 @@ describe('createPackageSummary', () => {
     expect(result).toHaveProperty('latest', '2.0.0');
     expect(result).toHaveProperty('installed', '1.0.0');
   });
+
+  it('returns summary with deprecated message for deprecated package', async () => {
+    mockFindModulePath.mockReturnValue('/mock/path');
+    mockReadPackageJson.mockReturnValue({
+      dependencies: {},
+      devDependencies: {}
+    } as INpmCheckPackageJson);
+    mockGetLatestFromRegistry.mockResolvedValue({
+      latest: '2.0.0',
+      next: '2.0.0',
+      versions: ['1.0.0', '2.0.0'],
+      homepage: 'https://homepage.com',
+      deprecated: 'This package is deprecated. Use new-package instead.'
+    } as INpmRegistryInfo);
+    const state: INpmCheckState = {
+      cwd: process.cwd(),
+      cwdPackageJson: { dependencies: { 'deprecated-pkg': '1.0.0' }, devDependencies: {} }
+    };
+    const result: INpmCheckPackageSummary | boolean = await createPackageSummary('deprecated-pkg', state);
+    expect(result).toBeTruthy();
+    expect(result).toHaveProperty('moduleName', 'deprecated-pkg');
+    expect(result).toHaveProperty('deprecated', 'This package is deprecated. Use new-package instead.');
+  });
+
+  it('returns summary without deprecated field for non-deprecated package', async () => {
+    mockFindModulePath.mockReturnValue('/mock/path');
+    mockReadPackageJson.mockReturnValue({
+      dependencies: {},
+      devDependencies: {}
+    } as INpmCheckPackageJson);
+    mockGetLatestFromRegistry.mockResolvedValue({
+      latest: '2.0.0',
+      next: '3.0.0',
+      versions: ['1.0.0', '2.0.0', '3.0.0'],
+      homepage: 'https://homepage.com'
+    } as INpmRegistryInfo);
+    const state: INpmCheckState = {
+      cwd: process.cwd(),
+      cwdPackageJson: { dependencies: { 'good-pkg': '1.0.0' }, devDependencies: {} }
+    };
+    const result: INpmCheckPackageSummary | boolean = await createPackageSummary('good-pkg', state);
+    expect(result).toBeTruthy();
+    expect(result).not.toHaveProperty('deprecated');
+  });
 });

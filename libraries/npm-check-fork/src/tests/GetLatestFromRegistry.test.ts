@@ -80,6 +80,42 @@ describe('getNpmInfo', () => {
     expect(result).toHaveProperty('homepage', '');
   });
 
+  it('returns deprecated message for deprecated latest version', async () => {
+    const mockData: INpmRegistryPackageResponse = {
+      name: 'test-package',
+      versions: {
+        '1.0.0': {
+          name: 'test-package',
+          version: '1.0.0',
+          deprecated: 'This package is deprecated. Use new-package instead.'
+        }
+      },
+      'dist-tags': { latest: '1.0.0', next: '1.0.0' }
+    };
+    mockFetchPackageMetadataAsync.mockResolvedValue({ data: mockData });
+
+    const result: INpmRegistryInfo = await getNpmInfo('test-package');
+    expect(result).toHaveProperty('latest', '1.0.0');
+    expect(result).toHaveProperty('deprecated', 'This package is deprecated. Use new-package instead.');
+  });
+
+  it('does not set deprecated for non-deprecated package', async () => {
+    const mockData: INpmRegistryPackageResponse = {
+      name: 'test-package',
+      versions: {
+        '1.0.0': {
+          name: 'test-package',
+          version: '1.0.0'
+        }
+      },
+      'dist-tags': { latest: '1.0.0', next: '1.0.0' }
+    };
+    mockFetchPackageMetadataAsync.mockResolvedValue({ data: mockData });
+
+    const result: INpmRegistryInfo = await getNpmInfo('test-package');
+    expect(result.deprecated).toBeUndefined();
+  });
+
   it('filters out versions exceeding CRAZY_HIGH_SEMVER threshold', async () => {
     const mockData: INpmRegistryPackageResponse = {
       name: 'test-package',

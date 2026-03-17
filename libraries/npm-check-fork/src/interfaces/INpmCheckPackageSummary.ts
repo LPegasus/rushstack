@@ -25,4 +25,5 @@ export interface INpmCheckPackageSummary {
   devDependency: boolean; // Is this a devDependency?
   mismatch: boolean; // Does the version installed not match the range in package.json?
   bump?: INpmCheckVersionBumpType; // What kind of bump is required to get the latest
+  deprecated?: string; // Deprecation message if the latest version of the package is deprecated.
 }

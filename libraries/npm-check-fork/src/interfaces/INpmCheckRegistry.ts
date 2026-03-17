@@ -7,6 +7,11 @@ export interface INpmRegistryInfo {
   versions?: string[];
   homepage?: string;
   error?: string;
+  /**
+   * Deprecation message for the latest version, if the package has been deprecated.
+   * Present only when the latest version is deprecated.
+   */
+  deprecated?: string;
 }
 
 interface INpmCheckRegistryInfoBugs {
@@ -40,6 +45,12 @@ export interface INpmRegistryVersionMetadata extends INpmCheckPackageVersion {
 
   /** Version string */
   version: string;
+
+  /**
+   * Deprecation message for this version, if the version has been deprecated.
+   * Present only when the package version is deprecated.
+   */
+  deprecated?: string;
 }
 
 /**

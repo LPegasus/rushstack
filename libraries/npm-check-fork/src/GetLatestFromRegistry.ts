@@ -67,7 +67,8 @@ export default async function getNpmInfo(packageName: string): Promise<INpmRegis
     latest: latestStableRelease,
     next: next,
     versions: sortedVersions,
-    homepage: bestGuessHomepage(registryData) || ''
+    homepage: bestGuessHomepage(registryData) || '',
+    deprecated: latestStableRelease ? rawData.versions[latestStableRelease]?.deprecated : undefined
   };
 }
 
